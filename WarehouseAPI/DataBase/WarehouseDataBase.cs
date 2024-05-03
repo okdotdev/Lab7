@@ -11,7 +11,6 @@ public class WarehouseDataBase : IWarehouseDataBase
 {
     private readonly IConfiguration _configuration;
 
-
     public WarehouseDataBase(IConfiguration configuration)
     {
         _configuration = configuration;
@@ -21,35 +20,40 @@ public class WarehouseDataBase : IWarehouseDataBase
     {
         SqlConnection connection = new(_configuration.GetConnectionString("Default"));
         connection.Open();
-        //check if connection is open
-        if (connection.State != ConnectionState.Open)
-        {
-            throw new Exception("Connection is not open!");
-        }
         return connection;
     }
 
     public void AddProductToWarehouse(AddProductToWarehouse product)
     {
+        //for now just print contents of the database to the console for debugging
+        SqlConnection connection = GetOpenConnection();
+        SqlCommand command = connection.CreateCommand();
+        command.CommandText = "SELECT * FROM Product";
+        SqlDataReader reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            Console.WriteLine(reader.GetInt32(0) + " " + reader.GetString(1) + " " + reader.GetString(2) + " " + reader.GetDecimal(3));
+        }
     }
 
     public Product? GetProductById(int id)
     {
         SqlConnection connection = GetOpenConnection();
         SqlCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM Products WHERE IdProduct = @id";
+        command.CommandText = "SELECT * FROM Product WHERE IdProduct = @id";
         command.Parameters.Add("@id", SqlDbType.Int).Value = id;
         SqlDataReader reader = command.ExecuteReader();
-        if (!reader.Read()) return null;
-        Product product = new()
+        if (reader.Read())
         {
-            IdProduct = reader.GetInt32(0),
-            Name = reader.GetString(1),
-            Description = reader.GetString(2),
-            Price = reader.GetDouble(3)
-        };
-        connection.Close();
-        return product;
+            return new Product
+            {
+                IdProduct = reader.GetInt32(0),
+                Name = reader.GetString(1),
+                Description = reader.GetString(2),
+                Price = reader.GetDecimal(3)
+            };
+        }
+        return null;
 
     }
 
@@ -57,18 +61,20 @@ public class WarehouseDataBase : IWarehouseDataBase
     {
         SqlConnection connection = GetOpenConnection();
         SqlCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM Warehouses WHERE IdWarehouse = @id";
+        command.CommandText = "SELECT * FROM Warehouse WHERE IdWarehouse = @id";
         command.Parameters.Add("@id", SqlDbType.Int).Value = id;
         SqlDataReader reader = command.ExecuteReader();
-        if (!reader.Read()) return null;
-        Warehouse warehouse = new()
+        if (reader.Read())
         {
-            IdWarehouse = reader.GetInt32(0),
-            Name = reader.GetString(1),
-            Address = reader.GetString(2)
-        };
-        connection.Close();
-        return warehouse;
+            return new Warehouse
+            {
+                IdWarehouse = reader.GetInt32(0),
+                Name = reader.GetString(1),
+                Address = reader.GetString(2)
+            };
+        }
+        return null;
+
 
     }
 
