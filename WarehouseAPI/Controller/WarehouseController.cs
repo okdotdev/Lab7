@@ -26,7 +26,26 @@ public class WarehouseController : Microsoft.AspNetCore.Mvc.Controller
             return BadRequest("Product data is missing");
         }
 
+        if (product.Amount <= 0)
+        {
+            return BadRequest("Amount must be greater than 0");
+        }
+
+        Product? productFromDb = _warehouseDataBase.GetProductById(product.IdProduct);
+        if (productFromDb == null)
+        {
+            return BadRequest("Product does not exist");
+        }
+
+        Warehouse? warehouseFromDb = _warehouseDataBase.GetWarehouseById(product.IdWarehouse);
+        if (warehouseFromDb == null)
+        {
+            return BadRequest("Warehouse does not exist");
+        }
+
+
         _warehouseDataBase.AddProductToWarehouse(product);
-        return Created("", null);
+
+        return Ok("Product added to warehouse");
     }
 }

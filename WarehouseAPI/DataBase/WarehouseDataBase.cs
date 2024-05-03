@@ -21,6 +21,11 @@ public class WarehouseDataBase : IWarehouseDataBase
     {
         SqlConnection connection = new(_configuration.GetConnectionString("Default"));
         connection.Open();
+        //check if connection is open
+        if (connection.State != ConnectionState.Open)
+        {
+            throw new Exception("Connection is not open!");
+        }
         return connection;
     }
 

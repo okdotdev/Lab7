@@ -1,27 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\s27773\\RiderProjects\\Lab7\\WarehouseAPI\\WarehouseAPI.csproj": {}
+    "/Users/oskalbarczyk/RiderProjects/Lab7/WarehouseAPI/WarehouseAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\s27773\\RiderProjects\\Lab7\\WarehouseAPI\\WarehouseAPI.csproj": {
+    "/Users/oskalbarczyk/RiderProjects/Lab7/WarehouseAPI/WarehouseAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\s27773\\RiderProjects\\Lab7\\WarehouseAPI\\WarehouseAPI.csproj",
+        "projectUniqueName": "/Users/oskalbarczyk/RiderProjects/Lab7/WarehouseAPI/WarehouseAPI.csproj",
         "projectName": "WarehouseAPI",
-        "projectPath": "C:\\Users\\s27773\\RiderProjects\\Lab7\\WarehouseAPI\\WarehouseAPI.csproj",
-        "packagesPath": "C:\\Users\\s27773\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\s27773\\RiderProjects\\Lab7\\WarehouseAPI\\obj\\",
+        "projectPath": "/Users/oskalbarczyk/RiderProjects/Lab7/WarehouseAPI/WarehouseAPI.csproj",
+        "packagesPath": "/Users/oskalbarczyk/.nuget/packages/",
+        "outputPath": "/Users/oskalbarczyk/RiderProjects/Lab7/WarehouseAPI/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\s27773\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/oskalbarczyk/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -77,7 +75,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.200/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
