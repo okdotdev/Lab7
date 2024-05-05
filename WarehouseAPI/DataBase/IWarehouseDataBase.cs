@@ -5,7 +5,9 @@ namespace WarehouseAPI.DataBase;
 
 public interface IWarehouseDataBase
 {
-    void AddProductToWarehouse(AddProductToWarehouse product);
-    Product? GetProductById(int id);
-    Warehouse? GetWarehouseById(int id);
+    Task<Product> FindProductById(int requestIdProduct);
+    Task<Warehouse> FindWarehouseById(int requestIdWarehouse);
+    Task<Order> FindOrderByProductIdAndAmount(int requestIdProduct, int requestAmount);
+    void AddProductToWarehouse(Product_Warehouse productWarehouse);
+
 }

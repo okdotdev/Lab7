@@ -1,8 +1,5 @@
-﻿using System.Data;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using WarehouseAPI.Model;
-using WarehouseAPI.Model.DTOs;
 
 
 namespace WarehouseAPI.DataBase;
@@ -16,66 +13,107 @@ public class WarehouseDataBase : IWarehouseDataBase
         _configuration = configuration;
     }
 
-    private SqlConnection GetOpenConnection()
+
+    private SqlConnection GetConnection()
     {
         SqlConnection connection = new(_configuration.GetConnectionString("Default"));
         connection.Open();
         return connection;
     }
 
-    public void AddProductToWarehouse(AddProductToWarehouse product)
+    public async Task<Product> FindProductById(int requestIdProduct)
     {
-        //for now just print contents of the database to the console for debugging
-        SqlConnection connection = GetOpenConnection();
-        SqlCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM Product";
-        SqlDataReader reader = command.ExecuteReader();
-        while (reader.Read())
+        using (SqlConnection connection = GetConnection())
         {
-            Console.WriteLine(reader.GetInt32(0) + " " + reader.GetString(1) + " " + reader.GetString(2) + " " + reader.GetDecimal(3));
-        }
-    }
-
-    public Product? GetProductById(int id)
-    {
-        SqlConnection connection = GetOpenConnection();
-        SqlCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM Product WHERE IdProduct = @id";
-        command.Parameters.Add("@id", SqlDbType.Int).Value = id;
-        SqlDataReader reader = command.ExecuteReader();
-        if (reader.Read())
-        {
-            return new Product
+            string query = "SELECT * FROM Product WHERE IdProduct = @IdProduct";
+            using (SqlCommand command = new(query, connection))
             {
-                IdProduct = reader.GetInt32(0),
-                Name = reader.GetString(1),
-                Description = reader.GetString(2),
-                Price = reader.GetDecimal(3)
-            };
+                command.Parameters.AddWithValue("@IdProduct", requestIdProduct);
+                SqlDataReader reader = await command.ExecuteReaderAsync();
+                if (await reader.ReadAsync())
+                {
+                    return new Product
+                    {
+                        IdProduct = Convert.ToInt32(reader["IdProduct"]),
+                        Name = Convert.ToString(reader["Name"]),
+                        Description = Convert.ToString(reader["Description"]),
+                        Price = Convert.ToDecimal(reader["Price"])
+                    };
+                }
+            }
         }
         return null;
-
     }
 
-    public Warehouse? GetWarehouseById(int id)
+    public async Task<Warehouse> FindWarehouseById(int requestIdWarehouse)
     {
-        SqlConnection connection = GetOpenConnection();
-        SqlCommand command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM Warehouse WHERE IdWarehouse = @id";
-        command.Parameters.Add("@id", SqlDbType.Int).Value = id;
-        SqlDataReader reader = command.ExecuteReader();
-        if (reader.Read())
+        using (SqlConnection connection = GetConnection())
         {
-            return new Warehouse
+            string query = "SELECT * FROM Warehouse WHERE IdWarehouse = @IdWarehouse";
+            using (SqlCommand command = new(query, connection))
             {
-                IdWarehouse = reader.GetInt32(0),
-                Name = reader.GetString(1),
-                Address = reader.GetString(2)
-            };
+                command.Parameters.AddWithValue("@IdWarehouse", requestIdWarehouse);
+                SqlDataReader reader = await command.ExecuteReaderAsync();
+                if (await reader.ReadAsync())
+                {
+                    return new Warehouse
+                    {
+                        IdWarehouse = Convert.ToInt32(reader["IdWarehouse"]),
+                        Name = Convert.ToString(reader["Name"]),
+                        Address = Convert.ToString(reader["Address"])
+                    };
+                }
+            }
         }
         return null;
-
-
     }
+
+    public async Task<Order> FindOrderByProductIdAndAmount(int requestIdProduct, int requestAmount)
+    {
+        using (SqlConnection connection = GetConnection())
+        {
+            string query = "SELECT * FROM [Order] WHERE IdProduct = @IdProduct AND Amount = @Amount";
+            using (SqlCommand command = new(query, connection))
+            {
+                command.Parameters.AddWithValue("@IdProduct", requestIdProduct);
+                command.Parameters.AddWithValue("@Amount", requestAmount);
+                SqlDataReader reader = await command.ExecuteReaderAsync();
+                if (await reader.ReadAsync())
+                {
+                    return new Order
+                    {
+                        IdOrder = Convert.ToInt32(reader["IdOrder"]),
+                        IdProduct = Convert.ToInt32(reader["IdProduct"]),
+                        Amount = Convert.ToInt32(reader["Amount"]),
+                        CreatedAt = Convert.ToDateTime(reader["CreatedAt"]),
+                        FulfilledAt = reader["FulfilledAt"] != DBNull.Value ? Convert.ToDateTime(reader["FulfilledAt"]) : (DateTime?)null
+                    };
+                }
+            }
+        }
+        return null;
+    }
+
+    public async void AddProductToWarehouse(Product_Warehouse productWarehouse)
+    {
+        using (SqlConnection connection = GetConnection())
+        {
+            string query = @"INSERT INTO Product_Warehouse (IdWarehouse, IdProduct, IdOrder, Amount, Price, CreatedAt)
+                                VALUES (@IdWarehouse, @IdProduct, @IdOrder, @Amount, @Price, @CreatedAt);
+                                SELECT SCOPE_IDENTITY();";
+            using (SqlCommand command = new(query, connection))
+            {
+                command.Parameters.AddWithValue("@IdWarehouse", productWarehouse.IdWarehouse);
+                command.Parameters.AddWithValue("@IdProduct", productWarehouse.IdProduct);
+                command.Parameters.AddWithValue("@IdOrder", productWarehouse.IdOrder);
+                command.Parameters.AddWithValue("@Amount", productWarehouse.Amount);
+                command.Parameters.AddWithValue("@Price", productWarehouse.Price);
+                command.Parameters.AddWithValue("@CreatedAt", productWarehouse.CreatedAt);
+                object result = await command.ExecuteScalarAsync();
+                int generatedId = Convert.ToInt32(result);
+            }
+        }
+    }
+
 
 }

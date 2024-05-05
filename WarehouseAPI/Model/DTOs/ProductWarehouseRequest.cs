@@ -1,6 +1,6 @@
 ﻿namespace WarehouseAPI.Model.DTOs
 {
-    public class AddProductToWarehouse
+    public class ProductWarehouseRequest
     {
         public int IdProduct { get; set; }
         public int IdWarehouse { get; set; }

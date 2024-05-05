@@ -19,40 +19,58 @@ public class WarehouseController : Microsoft.AspNetCore.Mvc.Controller
 
 
     [HttpPost]
-    public IActionResult AddProductToWarehouse([FromBody] AddProductToWarehouse product)
+    public async Task<IActionResult> AddProductToWarehouse([FromBody] ProductWarehouseRequest request)
     {
-        if (product == null)
-        {
-            return BadRequest("Product data is missing");
-        }
-        if (product.IdProduct <= 0)
-        {
-            return BadRequest("IdProduct must be greater than 0");
-        }
-        if (product.IdWarehouse <= 0)
-        {
-            return BadRequest("IdWarehouse must be greater than 0");
-        }
-        if (product.Amount <= 0)
-        {
-            return BadRequest("Amount must be greater than 0");
-        }
-        Product? productFromDb = _warehouseDataBase.GetProductById(product.IdProduct);
-        if (productFromDb == null)
-        {
-            return BadRequest("Product does not exist");
-        }
+            // Sprawdzanie czy produkt o podanym IdProduct istnieje
+            Product product = await _warehouseDataBase.FindProductById(request.IdProduct);
+            if (product == null)
+            {
+                return BadRequest("Product not found");
+            }
 
+            // Sprawdzanie czy magazyn o podanym IdWarehouse istnieje
+            Warehouse warehouse = await _warehouseDataBase.FindWarehouseById(request.IdWarehouse);
+            if (warehouse == null)
+            {
+                return BadRequest("Warehouse not found");
+            }
 
+            // Sprawdzanie czy ilość jest większa niż 0
+            if (request.Amount <= 0)
+            {
+                return BadRequest("Amount must be greater than 0");
+            }
 
-        Warehouse? warehouseFromDb = _warehouseDataBase.GetWarehouseById(product.IdWarehouse);
-        if (warehouseFromDb == null)
-        {
-            return BadRequest("Warehouse does not exist");
-        }
+            // Sprawdzanie czy istnieje zamówienie zakupu produktu
+            Order order = await _warehouseDataBase.FindOrderByProductIdAndAmount(request.IdProduct, request.Amount);
+            if (order == null)
+            {
+                return BadRequest("Order not found");
+            }
 
-        _warehouseDataBase.AddProductToWarehouse(product);
+            // Sprawdzanie czy zamówienie nie zostało zrealizowane
+            if (order.FulfilledAt != null)
+            {
+                return BadRequest("Order already fulfilled");
+            }
 
-        return Ok("Product added to warehouse");
+            // Aktualizacja kolumny FullfilledAt zamówienia na aktualną datę i godzinę
+            order.FulfilledAt = DateTime.Now;
+
+            // Wstawienie rekordu do tabeli Product_Warehouse
+            Product_Warehouse productWarehouse = new Product_Warehouse
+            {
+                IdWarehouse = request.IdWarehouse,
+                IdProduct = request.IdProduct,
+                IdOrder = order.IdOrder,
+                Amount = request.Amount,
+                Price = product.Price * request.Amount,
+                CreatedAt = DateTime.Now
+            };
+            _warehouseDataBase.AddProductToWarehouse(productWarehouse);
+
+            // Zwrócenie wartości klucza głównego wygenerowanego dla rekordu wstawionego do tabeli Product_Warehouse
+            return Ok(productWarehouse.IdProductWarehouse);
     }
-}
+    }
+
