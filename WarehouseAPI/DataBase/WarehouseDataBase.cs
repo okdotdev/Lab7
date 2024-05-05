@@ -115,5 +115,8 @@ public class WarehouseDataBase : IWarehouseDataBase
         }
     }
 
+    public void AddProductToWarehouseWithStoredProcedure(Product_Warehouse productWarehouse)
+    {
 
+    }
 }

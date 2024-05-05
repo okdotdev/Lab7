@@ -10,4 +10,5 @@ public interface IWarehouseDataBase
     Task<Order> FindOrderByProductIdAndAmount(int requestIdProduct, int requestAmount);
     void AddProductToWarehouse(Product_Warehouse productWarehouse);
 
+    void AddProductToWarehouseWithStoredProcedure(Product_Warehouse productWarehouse);
 }
